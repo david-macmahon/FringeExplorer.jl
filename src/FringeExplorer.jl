@@ -117,7 +117,7 @@ transits.  `Ω` is used to convert `h` to time (see [`ha2t`](@ref)).
 wdw = hd2wdw(ha, dec) * antpos
 ```
 """
-hd2wdw(h, δ, Ω=Ωe) = tdwdw(ha2t(h, Ω), δ)
+hd2wdw(h, δ, Ω=Ωe) = td2wdw(ha2t(h, Ω), δ)
 hδ2wdw = hd2wdw
 
 """
@@ -132,7 +132,7 @@ should be in seconds, with `t<0` before the source transits, `t==0` when the
 source transits, and `t>0` after the source transits.  `Ω` is used to convert
 `h` to time (see [`ha2t`](@ref)).
 """
-hd2wdw!(dst, h, δ, Ω=Ωe) = tdwdw!(dst, ha2t(h, Ω), δ)
+hd2wdw!(dst, h, δ, Ω=Ωe) = td2wdw!(dst, ha2t(h, Ω), δ)
 hδ2wdw! = hd2wdw!
 
 end # module FringeExplorer
