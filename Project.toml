@@ -4,8 +4,6 @@ authors = ["David MacMahon <davidm@astro.berkeley.edu>"]
 version = "0.1.0"
 
 [deps]
-AbstractPlotting = "537997a7-5e4e-5d89-9595-2241ea00577e"
-BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 ERFA = "17511681-8477-586a-8d98-4cfd5a1f2ec3"
 EarthOrientation = "732a3c5d-d6c0-58bc-adb1-1b51709a25e2"
