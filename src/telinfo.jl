@@ -7,7 +7,7 @@ using YAML: load_file
 
 Loads YAML file `yamlfile` using `dicttype=Dict{Symbol,Amy}`.
 """
-telinfo(fname) = YAML.load_file(fname, dicttype=Dict{Symbol,Any})
+telinfo(fname) = load_file(fname, dicttype=Dict{Symbol,Any})
 
 """
     antpos(telinfo_yml::AbstracyString)
