@@ -3,18 +3,18 @@
 using Rotations
 
 """
-    c2s(x, y, z) -> (θ, ϕ)
-    c2s(xyz::AbstractVector) -> (θ, ϕ)
+    c2s(x, y, z) -> [θ, ϕ]
+    c2s(xyz::AbstractVector) -> [θ, ϕ]
     c2s(xyz::AbstractMatrix) -> [θs; ϕs]
 
-Convert Cartesian vector `[x, y, z]` (or `xyz`) to spherical unit vector `(θ,
-ϕ)`.  For AbstractMatrix `xyz`, each column is converted and the results are
+Convert Cartesian vector `[x, y, z]` (or `xyz`) to spherical unit vector `[θ,
+ϕ]`.  For AbstractMatrix `xyz`, each column is converted and the results are
 reassmebled into a Matrix using `hcat`.
 """
 function c2s(x,y,z)
     θ=atan(y,x)
     ϕ=atan(z, hypot(x,y))
-    (θ, ϕ)
+    [θ, ϕ]
 end
 
 function c2s(xyz::AbstractVector{<:Real})
@@ -22,22 +22,22 @@ function c2s(xyz::AbstractVector{<:Real})
 end
 
 function c2s(xyz::AbstractMatrix{<:Real})
-    @views reduce(hcat, [θ, ϕ] for (θ, ϕ) in c2s.(xyz[1,:], xyz[2,:], xyz[3,:]))
+    @views reduce(hcat, c2s.(xyz[1,:], xyz[2,:], xyz[3,:]))
 end
 
 """
-    s2c(θ, ϕ) -> (x, y, z)
-    s2c(θϕ::AbstractVector) -> (x, y, z)
+    s2c(θ, ϕ) -> [x, y, z)
+    s2c(θϕ::AbstractVector) -> [x, y, z]
     s2c(θϕ::AbstractMaxtrix) -> [xs; ys; zs]
 
-Convert spherical unit vector `[θ, ϕ]` (or `θϕ`) to Cartesian unit vector `(x,
-y, z)`.  For AbstractMatrix `θϕ`, each column is converted and the results are
+Convert spherical unit vector `[θ, ϕ]` (or `θϕ`) to Cartesian unit vector `[x,
+y, z]`.  For AbstractMatrix `θϕ`, each column is converted and the results are
 reassmebled into a Matrix using `hcat`.
 """
 function s2c(θ,ϕ)
     z, r = sincos(ϕ)
     y, x = sincos(θ) .* r
-    (x, y, z)
+    [x, y, z]
 end
 
 function s2c(θϕ::AbstractVector{<:Real})
@@ -45,7 +45,7 @@ function s2c(θϕ::AbstractVector{<:Real})
 end
 
 function s2c(θϕ::AbstractMatrix{<:Real})
-    @views reduce(hcat, [x, y, z] for (x, y, z) in s2c.(θϕ[1,:], θϕ[2,:]))
+    @views reduce(hcat, s2c.(θϕ[1,:], θϕ[2,:]))
 end
 
 """

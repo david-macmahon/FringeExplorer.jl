@@ -8,11 +8,13 @@ using InteractiveUtils
 begin
 	import Pkg
 	Pkg.activate(Base.current_project())
-	#using WGLMakie
 	using CairoMakie
 	using GeometryBasics
 	using PlutoUI
 	using Rotations
+	using FringeExplorer
+	using LinearAlgebra
+	using ERFA # For sepp until we add a composable version to FringeExplorer.
 	md"""# Coordinate Explorations"""
 end
 
@@ -48,107 +50,62 @@ begin
 	f2
 end
 
-# ╔═╡ 25b138a9-e15b-4c52-9a2a-9292d205ad07
-begin
-	function c2s(x,y,z)
-		θ=atan(y,x)
-		ϕ=atan(z, hypot(x,y))
-		[θ, ϕ]
-	end
-	function c2s(xyz::AbstractVector{<:Real})
-		c2s(xyz[1], xyz[2], xyz[3])
-	end
-	function c2s(xyz::AbstractMatrix{<:Real})
-		#reduce(hcat, c2s.(xyz[1,:], xyz[2,:], xyz[3,:]))
-		mapreduce(c2s, hcat, eachcol(xyz))
-	end
-	(0,1,0)=>c2s(0,1,0)
-end
+# ╔═╡ 3319a555-62b0-44ac-a2e9-01ebeca5a07b
+fwhm = deg2rad(4)
 
-# ╔═╡ a8da9102-89a1-40b6-aebc-64e81286cf4d
-begin
-	function s2c(θ,ϕ)
-		z, r = sincos(ϕ)
-		y, x = sincos(θ) .* r
-		[x, y, z]
-	end
-	#function s2c(θϕ::AbstractVector{<:Real})
-	#	s2c(θϕ[1], θϕ[2])
-	#end
-	function s2c(θϕ::AbstractMatrix{<:Real})
-		#mapreduce(s2c, hcat, eachcol(θϕ))
-		@views reduce(hcat, s2c.(θϕ[1,:], θϕ[2,:]))
-	end
-	(π/2, 0) => s2c(π/2, 0)
-end
+# ╔═╡ 62fa9f61-3aa4-4542-9629-67e93198d5b1
+α0=5π/4
 
-# ╔═╡ 89058f56-f2db-4aa9-8ce7-f0433e889320
-function beamrings(h, δ, nrings=4, dϕ=deg2rad(10/3600))
-	centers = [[0, π/2]]
-	for r in 1:nrings
-		nθ = 6r
-		for i in 0:nθ-1
-			θ = i*2π/nθ
-			ϕ = π/2 - r*dϕ
-			push!(centers, [θ, ϕ])
-		end
-	end
-	mapreduce(c2s, hcat, Ref(RotZY(h, π/2-δ)) .* s2c.(centers))
-end	
-
-# ╔═╡ 19c5dccb-5304-4a40-8c51-3e824e4fe90a
-function beamrings2(h, δ, nrings=4, dϕ=deg2rad(10/3600))
-	centers = [[0, π/2]]
-	for r in 1:nrings
-		nθ = 6r
-		for i in 0:nθ-1
-			θ = i*2π/nθ
-			ϕ = π/2 - r*dϕ
-			push!(centers, [θ, ϕ])
-		end
-	end
-	RotZY(h, π/2-δ) * mapreduce(s2c, hcat, centers) |> c2s
-end	
-
-# ╔═╡ 6142df3c-70f6-47c9-96e1-26ac1e7afe60
-function beamrings3(θ, ϕ, nrings=4, dϕ=deg2rad(10/3600))
-	nbeams = 6 * sum(1:nrings) + 1
-	θs = Vector{Float64}(undef, nbeams)
-	ϕs = Vector{Float64}(undef, nbeams)
-	θs[1] = 0.0
-	ϕs[1] = π/2
-	b=2
-	for r in 1:nrings
-		nθ = 6r
-		dθ = 2π/nθ
-		ϕr = π/2 - r * dϕ
-		for i in 0:nθ-1
-			θs[b] = i*dθ
-			ϕs[b] = ϕr
-			b += 1
-		end
-	end
-	reduce(hcat, c2s.(Ref(RotZY(θ, π/2-ϕ)) .* s2c.(θs, ϕs)))
-end	
-
-# ╔═╡ eceac8ca-ce9b-42b1-8569-fc6b4cccf324
-beamrings(0, 1)
-
-# ╔═╡ 79c852fa-ce49-4b31-a615-086ac927c4d2
-beamrings2(0, 1)
+# ╔═╡ 48266d0e-c873-4597-a981-e86c47250a8b
+δ0=π/6
 
 # ╔═╡ 34b142aa-0b8f-4311-b922-88fddc7fdc15
-beamrings3(0,1)
+centers=beamrings(α0, δ0; nrings=4, dϕ=fwhm)
+
+# ╔═╡ f657d533-e777-4ec0-8367-c035279d9d20
+centerc = FringeExplorer.s2c(centers)
+
+# ╔═╡ 10fb9c7d-bcc3-45ce-8cf2-eca33ab3a5d0
+# Cross beam center vectors with Z axis to get rotation axes
+crosses = cross.(Ref([0.0,0.0,1.0]), eachcol(centerc))
+
+# ╔═╡ 0417c07f-47d3-4c12-8960-333c78f3288a
+beamseps = sepp.(Ref([0.0,0.0,1.0]), eachcol(centerc))
+
+# ╔═╡ 8c965934-14da-4bf8-b30c-8ad94ee601cd
+begin
+	f3=Figure()
+	a3=Axis3(f3[1,1], limits=((-1,1),(-1,1),(-1,1)),
+		              aspect=(1,1,1),
+					  azimuth=deg2rad(210))
+	s3=Sphere(Point3f(0), 1.0)
+	c3=Circle(Point2f(0), 1.0)#tan(fwhm/2))
+	#arrows!([0,0,0], [0,0,0], [0,0,0], [1,0,0], [0,1,0], [0,0,1])
+	mesh!(s3, color=RGBAf(1.0, 1.0, 1.0, 0.4))
+	lines!(c3, color=RGBAf(0.5, 0.5, 0.5, 0.5))
+	for ax in (Vec3f(0,1,0), Vec3f(1,0,0))
+		transformation=Transformation(;rotation=qrotation(ax, π/2))
+		lines!(c3; color=RGBAf(0.5, 0.5, 0.5, 0.5), transformation)
+	end
+	for (i, beam) in enumerate(eachcol(centerc))
+		trans = Transformation(;scale=Vec3f(tan(fwhm/2)),
+								translation=beam,
+								rotation=qrotation(Vec3f(crosses[i]), beamseps[i]))
+		lines!(c3, transformation=trans)
+	end
+	f3
+end
+	
 
 # ╔═╡ Cell order:
-# ╠═89001295-1da7-496b-8c72-475520512b8a
+# ╟─89001295-1da7-496b-8c72-475520512b8a
 # ╟─3639b720-f3c6-49e9-9106-84398cc332df
-# ╠═e1e798aa-259a-435b-baea-857bf893cde3
-# ╟─25b138a9-e15b-4c52-9a2a-9292d205ad07
-# ╠═a8da9102-89a1-40b6-aebc-64e81286cf4d
-# ╟─89058f56-f2db-4aa9-8ce7-f0433e889320
-# ╟─19c5dccb-5304-4a40-8c51-3e824e4fe90a
-# ╠═6142df3c-70f6-47c9-96e1-26ac1e7afe60
-# ╠═eceac8ca-ce9b-42b1-8569-fc6b4cccf324
-# ╠═79c852fa-ce49-4b31-a615-086ac927c4d2
+# ╟─e1e798aa-259a-435b-baea-857bf893cde3
+# ╠═3319a555-62b0-44ac-a2e9-01ebeca5a07b
+# ╠═62fa9f61-3aa4-4542-9629-67e93198d5b1
+# ╠═48266d0e-c873-4597-a981-e86c47250a8b
 # ╠═34b142aa-0b8f-4311-b922-88fddc7fdc15
+# ╠═f657d533-e777-4ec0-8367-c035279d9d20
+# ╠═10fb9c7d-bcc3-45ce-8cf2-eca33ab3a5d0
+# ╠═0417c07f-47d3-4c12-8960-333c78f3288a
+# ╠═8c965934-14da-4bf8-b30c-8ad94ee601cd
