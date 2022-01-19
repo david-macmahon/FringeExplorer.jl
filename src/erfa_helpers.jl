@@ -15,7 +15,7 @@ const MJD0 = DJM0
                 yp=getxp(jdutc+jdutc2)*DAS2R
                ) -> (hob, δob)
 
-    radec2hadec(αδ::AbstractMatrix, jdutc; kwargs...) -> [hobs; δobs]
+    radec2hadec(αδ::AbstractMatrix, jdutc; kwargs...) -> Matrix[hobs; δobs]
 
 Convert ICRS right ascension `α` and declination `δ` to observed hour angle
 `hob` and observed declination `δob` as seen from the location specified by
