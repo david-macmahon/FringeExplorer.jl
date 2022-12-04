@@ -50,20 +50,20 @@ ap = antpos(ti[:antennas])  # => Array{Float64,2}
 function antpos(antennas::AbstractVector{<:AbstractDict{Symbol,Any}})
     ants = sort(antennas, by=a->a[:number])
     reduce(hcat, (a[:position] for a in ants))
-end,
+end
 
 function antpos(antennas::AbstractVector{<:AbstractDict{String,Any}})
     ants = sort(antennas, by=a->a["number"])
     reduce(hcat, (a["position"] for a in ants))
-end,
+end
 
 function antpos(ti::AbstractDict{Symbol,Any})
     antpos(ti[:antennas])
-end,
+end
 
 function antpos(ti::AbstractDict{String,Any})
     antpos(ti["antennas"])
-end,
+end
 
 function antpos(tiyml::AbstractString; dicttype=Dict{Symbol,Any})
     antpos(telinfo(tiyml; dicttype))
