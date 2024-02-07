@@ -21,3 +21,12 @@ Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
 TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 WGLMakie = "276b4fcb-3e11-5398-bf8b-a0c2d153d008"
 YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
+
+[weakdeps]
+IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
+
+[extras]
+IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
+
+[compat]
+IntervalSets = "0.7 - 0.7.3"
