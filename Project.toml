@@ -1,7 +1,7 @@
 name = "FringeExplorer"
 uuid = "a3308ebd-878a-40c3-94ea-c874aaa84770"
 authors = ["David MacMahon <davidm@astro.berkeley.edu>"]
-version = "0.1.2"
+version = "0.1.3"
 
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
