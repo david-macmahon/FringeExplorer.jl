@@ -21,3 +21,6 @@ Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
 TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 WGLMakie = "276b4fcb-3e11-5398-bf8b-a0c2d153d008"
 YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
+
+[compat]
+RadioInterferometry = "0.7"
